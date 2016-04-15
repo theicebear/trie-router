@@ -4,9 +4,9 @@ var METHODS = require('methods').map(function (method) {
 var request = require('supertest')
 var assert = require('assert')
 var koa = require('koa')
+var Router = require('..')
 
-var router = require('..')()
-
+var router = new Router
 var app = koa()
 
 app.use(router.dispatcher())
@@ -203,7 +203,7 @@ it('should throw catchable error for malformed url', function (done) {
       }
     }
   })
-  var router2 = require('../')()
+  var router2 = new Router()
   app2.use(function* () {
     yield router2.dispatcher()
   })

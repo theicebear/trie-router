@@ -1,8 +1,8 @@
 var request = require('supertest')
 var koa = require('koa')
+var Router = require('..')
 
-var router = require('..')()
-
+var router = new Router();
 var app = koa()
 
 app.use(function* (next) {
