@@ -5,17 +5,17 @@ var request = require('supertest')
 var assert = require('assert')
 var koa = require('koa')
 
-var router = require('..')
+var router = require('..')();
 
 var app = koa()
 
-app.use(router(app))
+app.use(router.dispatcher())
 
 var server = app.listen()
 
-describe('app[method]()', function () {
+describe('router[method]()', function () {
   it('should work', function (done) {
-    app.get('/home', function* (next) {
+    router.get('/home', function* (next) {
       this.status = 204
     })
 
@@ -26,12 +26,12 @@ describe('app[method]()', function () {
 
   it('should throw on non-gen-funs', function () {
     assert.throws(function () {
-      app.get('/home', function () {})
+      router.get('/home', function () {})
     })
   })
 
   it('should match params', function (done) {
-    app.get('/:a(one)/:b(two)', function* (next) {
+    router.get('/:a(one)/:b(two)', function* (next) {
       this.params.a.should.equal('one')
       this.params.b.should.equal('two')
       this.status = 204
@@ -43,7 +43,7 @@ describe('app[method]()', function () {
   })
 
   it('should still have this.params with no matched params', function (done) {
-    app.get('/asdfasdf', function* (next) {
+    router.get('/asdfasdf', function* (next) {
       this.params.should.eql({})
       this.status = 204
     })
@@ -55,14 +55,14 @@ describe('app[method]()', function () {
 
   it('should have all the methods defined', function () {
     METHODS.forEach(function (method) {
-      app[method.toLowerCase()].should.be.a.Function
+      router[method.toLowerCase()].should.be.a.Function
     })
 
-    app.del.should.be.a.Function
+    router.del.should.be.a.Function
   })
 
   describe('when defining nested routes', function () {
-    app.get(['/stack/one', ['/stack/two', '/stack/three']], function* (next) {
+    router.get(['/stack/one', ['/stack/two', '/stack/three']], function* (next) {
       this.status = 204
     })
 
@@ -86,7 +86,7 @@ describe('app[method]()', function () {
   })
 
   describe('when defining nested middleware', function (done) {
-    app.get('/two', noop, [noop, noop], function* (next) {
+    router.get('/two', noop, [noop, noop], function* (next) {
       this.status = 204
     })
 
@@ -96,9 +96,9 @@ describe('app[method]()', function () {
   })
 })
 
-describe('app.route()', function () {
+describe('router.route()', function () {
   it('should work', function (done) {
-    app.route('/something').get(function* (next) {
+    router.route('/something').get(function* (next) {
       this.status = 204
     })
 
@@ -108,7 +108,7 @@ describe('app.route()', function () {
   })
 
   it('should have all the methods defined', function () {
-    var route = app.route('/kajsdlfkjasldkfj')
+    var route = router.route('/kajsdlfkjasldkfj')
 
     METHODS.forEach(function (method) {
       route[method.toLowerCase()].should.be.a.Function
@@ -118,7 +118,7 @@ describe('app.route()', function () {
   })
 
   describe('when defining nested routes', function () {
-    app
+    router
     .route(['/stack2/one', ['/stack2/two', '/stack2/three']])
     .get(function* (next) {
       this.status = 204
@@ -144,7 +144,7 @@ describe('app.route()', function () {
   })
 
   describe('when defining nested middleware', function (done) {
-    app
+    router
     .route('/monkey')
     .get(noop, [noop, noop], function* (next) {
       this.status = 204
@@ -163,8 +163,14 @@ describe('404', function(){
     .expect(404, done)
   })
 
+  it('should 404 when not matched', function (done) {
+    request(server)
+      .get('/%')
+      .expect(404, done)
+  })
+
   it('should 404 when not matched w/ superior route', function (done) {
-    app
+    router
     .get('/app/home', function* (next) {
       this.status = 204;
     })
@@ -176,7 +182,7 @@ describe('404', function(){
 })
 
 it('should 404 for uncaught malformed url', function (done) {
-  app.get('/', function* (next) {
+  router.get('/', function* (next) {
     this.status = 204
   })
 
@@ -194,9 +200,12 @@ it('should throw catchable error for malformed url', function (done) {
       if (e.code == 'MALFORMEDURL') this.body = 'malformed URL'
     }
   })
-  app2.use(router(app2))
+  var router2 = require('../')();
+  app2.use(function* () {
+    yield router2.dispatcher()
+  })
 
-  app2.get('/', function* (next) {
+  router2.get('/', function* (next) {
     this.status = 204
   })
 
@@ -210,7 +219,7 @@ it('should throw catchable error for malformed url', function (done) {
 
 describe('regressions', function () {
   it('should not 404 with child routes', function (done) {
-    app
+    router
     .get('/a', function* () {
       this.response.status = 204;
     })
