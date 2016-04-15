@@ -1,13 +1,13 @@
 var request = require('supertest')
 var koa = require('koa')
 
-var router = require('..')
+var router = require('..')();
 
 var app = koa()
 
 app.use(function* (next) {
   try {
-    this.assertImplementsMethod()
+    router.assertImplementsMethod().apply(this);
   } catch (err) {
     this.status = 501
     return
@@ -16,15 +16,15 @@ app.use(function* (next) {
   yield* next
 })
 
-app.use(router(app))
+app.use(router.dispatcher())
 
 var server = app.listen()
 
-app.get('/', function* (next) {
+router.get('/', function* (next) {
   this.status = 204
 })
 
-app.search('/kasdjflkajsdf', function* (next) {
+router.search('/kasdjflkajsdf', function* (next) {
   this.status = 204
 })
 
