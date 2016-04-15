@@ -1,11 +1,10 @@
-# Koa Trie Router
+# Trie Koa Router
 
 [![NPM version][npm-image]][npm-url]
 [![build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
-[![Gittip][gittip-image]][gittip-url]
 
-[Trie](http://en.wikipedia.org/wiki/Trie) routing for Koa based on [routington](https://github.com/jonathanong/routington).
+[Trie](http://en.wikipedia.org/wiki/Trie) routing for Koa based on [routington](https://github.com/jonathanong/routington), a fork of [Koa Trie Router](https://github.com/koajs/trie-router).
 
 ## Features
 
@@ -20,21 +19,21 @@ See [routington](https://github.com/jonathanong/routington) for more details.
 
 ```js
 var app = require('koa')()
-app.use(require('koa-trie-router')(app))
+var router = require('trie-koa-router')()
+app.use(router.dispatcher())
 
-app.route('/')
-.get(function* (next) {
+router.route('/').get(function* (next) {
   this.body = 'homepage'
 })
 
-app.post('/images', function* (next) {
+router.post('/images', function* (next) {
   var image = yield* this.request.buffer('25mb')
 })
 ```
 
 ## API
 
-### this.assertImplementsMethod()
+### router.assertImplementsMethod()
 
 Checks if the server implements a particular method and throws a `501` error otherwise.
 This is not middleware, so you would have to use it in your own middleware.
@@ -43,24 +42,22 @@ This is not middleware, so you would have to use it in your own middleware.
 app.use(myCustomErrorHandler)
 
 app.use(function* (next) {
-  this.request.assertImplementsMethod() // throws otherwise
+  router.assertImplementsMethod().apply(this) // throws otherwise
   yield next
 })
 ```
 
-### app.use(app.router)
+### app.use(router.dispatcher())
 
-Like Express, all routes belong to a single middleware.
-Unlike Express, `app.router` is not implicitly mounted.
-If you do not do `app.use(app.router)` ever,
+If you do not do `app.use(router.dispatcher())` ever,
 routing will never work.
 
-### app.route(paths)\[method\]\(middleware...\)
+### router.route(paths)\[method\]\(middleware...\)
 
 `paths` can be a nested stack of string paths:
 
 ```js
-app.route('/one', [
+router.route('/one', [
   '/two',
   ['/three', '/four']
 ])
@@ -69,7 +66,7 @@ app.route('/one', [
 You can then chain `[method](middleware...)` calls.
 
 ```js
-app.route('/')
+router.route('/')
 .get(function* (next) {
 
 })
@@ -81,12 +78,12 @@ app.route('/')
 })
 ```
 
-### app\[method\]\(paths, middleware...\)
+### router\[method\]\(paths, middleware...\)
 
 Similar to above, but you define `paths` as the first argument:
 
 ```js
-app.get([
+router.get([
   '/one',
   '/two'
 ], function* (next) {
@@ -99,7 +96,7 @@ app.get([
 `this.params` will be defined with any matched parameters.
 
 ```js
-app.get('/user/:name', function* (next) {
+router.get('/user/:name', function* (next) {
   var name = this.params.name
   var user = yield User.get(name)
   yield next
@@ -121,11 +118,11 @@ For path definitions, see [routington](https://github.com/jonathanong/routington
 
 In `trie-router`, routes are orthogonal and strict. Unlike regexp routing, there's no wildcard routing and you can't `next` to the next matching route.
 
-[npm-image]: https://img.shields.io/npm/v/koa-trie-router.svg?style=flat
-[npm-url]: https://npmjs.org/package/koa-trie-router
-[travis-image]: https://img.shields.io/travis/koajs/trie-router.svg?style=flat
-[travis-url]: https://travis-ci.org/koajs/trie-router
-[coveralls-image]: https://img.shields.io/coveralls/koajs/trie-router.svg?style=flat
-[coveralls-url]: https://coveralls.io/r/koajs/trie-router?branch=master
-[gittip-image]: https://img.shields.io/gittip/jonathanong.svg?style=flat
-[gittip-url]: https://www.gittip.com/jonathanong/
+[npm-image]: https://img.shields.io/npm/v/trie-koa-router.svg?style=flat
+[npm-url]: https://npmjs.org/package/trie-koa-router
+[travis-image]: https://img.shields.io/travis/theicebear/trie-router.svg?style=flat
+[travis-url]: https://travis-ci.org/theicebear/trie-router
+[coveralls-image]: https://img.shields.io/coveralls/theicebear/trie-router.svg?style=flat
+[coveralls-url]: https://coveralls.io/r/theicebear/trie-router?branch=master
+
+

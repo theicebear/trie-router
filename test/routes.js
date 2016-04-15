@@ -5,7 +5,7 @@ var request = require('supertest')
 var assert = require('assert')
 var koa = require('koa')
 
-var router = require('..')();
+var router = require('..')()
 
 var app = koa()
 
@@ -20,13 +20,14 @@ describe('router[method]()', function () {
     })
 
     request(server)
-    .get('/home')
-    .expect(204, done)
+      .get('/home')
+      .expect(204, done)
   })
 
   it('should throw on non-gen-funs', function () {
     assert.throws(function () {
-      router.get('/home', function () {})
+      router.get('/home', function () {
+      })
     })
   })
 
@@ -38,8 +39,8 @@ describe('router[method]()', function () {
     })
 
     request(server)
-    .get('/one/two')
-    .expect(204, done)
+      .get('/one/two')
+      .expect(204, done)
   })
 
   it('should still have this.params with no matched params', function (done) {
@@ -49,8 +50,8 @@ describe('router[method]()', function () {
     })
 
     request(server)
-    .get('/asdfasdf')
-    .expect(204, done)
+      .get('/asdfasdf')
+      .expect(204, done)
   })
 
   it('should have all the methods defined', function () {
@@ -68,20 +69,20 @@ describe('router[method]()', function () {
 
     it('the first should work', function (done) {
       request(server)
-      .get('/stack/one')
-      .expect(204, done)
+        .get('/stack/one')
+        .expect(204, done)
     })
 
     it('the second should work', function (done) {
       request(server)
-      .get('/stack/two')
-      .expect(204, done)
+        .get('/stack/two')
+        .expect(204, done)
     })
 
     it('the third should work', function (done) {
       request(server)
-      .get('/stack/three')
-      .expect(204, done)
+        .get('/stack/three')
+        .expect(204, done)
     })
   })
 
@@ -91,8 +92,8 @@ describe('router[method]()', function () {
     })
 
     request(server)
-    .get('/two')
-    .expect(204, done)
+      .get('/two')
+      .expect(204, done)
   })
 })
 
@@ -103,8 +104,8 @@ describe('router.route()', function () {
     })
 
     request(server)
-    .get('/something')
-    .expect(204, done)
+      .get('/something')
+      .expect(204, done)
   })
 
   it('should have all the methods defined', function () {
@@ -119,48 +120,48 @@ describe('router.route()', function () {
 
   describe('when defining nested routes', function () {
     router
-    .route(['/stack2/one', ['/stack2/two', '/stack2/three']])
-    .get(function* (next) {
-      this.status = 204
-    })
+      .route(['/stack2/one', ['/stack2/two', '/stack2/three']])
+      .get(function* (next) {
+        this.status = 204
+      })
 
     it('the first should work', function (done) {
       request(server)
-      .get('/stack2/one')
-      .expect(204, done)
+        .get('/stack2/one')
+        .expect(204, done)
     })
 
     it('the second should work', function (done) {
       request(server)
-      .get('/stack2/two')
-      .expect(204, done)
+        .get('/stack2/two')
+        .expect(204, done)
     })
 
     it('the third should work', function (done) {
       request(server)
-      .get('/stack2/three')
-      .expect(204, done)
+        .get('/stack2/three')
+        .expect(204, done)
     })
   })
 
   describe('when defining nested middleware', function (done) {
     router
-    .route('/monkey')
-    .get(noop, [noop, noop], function* (next) {
-      this.status = 204
-    })
+      .route('/monkey')
+      .get(noop, [noop, noop], function* (next) {
+        this.status = 204
+      })
 
     request(server)
-    .get('/monkey')
-    .expect(204, done)
+      .get('/monkey')
+      .expect(204, done)
   })
 })
 
-describe('404', function(){
+describe('404', function () {
   it('should 404 when not matched', function (done) {
     request(server)
-    .get('/asdf')
-    .expect(404, done)
+      .get('/asdf')
+      .expect(404, done)
   })
 
   it('should 404 when not matched', function (done) {
@@ -171,13 +172,13 @@ describe('404', function(){
 
   it('should 404 when not matched w/ superior route', function (done) {
     router
-    .get('/app/home', function* (next) {
-      this.status = 204;
-    })
+      .get('/app/home', function* (next) {
+        this.status = 204
+      })
 
     request(server)
-    .get('/app')
-    .expect(404, done)
+      .get('/app')
+      .expect(404, done)
   })
 })
 
@@ -187,8 +188,8 @@ it('should 404 for uncaught malformed url', function (done) {
   })
 
   request(server)
-  .get('/%')
-  .expect(404, done)
+    .get('/%')
+    .expect(404, done)
 })
 
 it('should throw catchable error for malformed url', function (done) {
@@ -197,10 +198,12 @@ it('should throw catchable error for malformed url', function (done) {
     try {
       yield next
     } catch (e) {
-      if (e.code == 'MALFORMEDURL') this.body = 'malformed URL'
+      if (e.code == 'MALFORMEDURL') {
+        this.body = 'malformed URL'
+      }
     }
   })
-  var router2 = require('../')();
+  var router2 = require('../')()
   app2.use(function* () {
     yield router2.dispatcher()
   })
@@ -210,44 +213,44 @@ it('should throw catchable error for malformed url', function (done) {
   })
 
   request(app2.listen())
-  .get('/%%')
-  .expect(200, function (err, res) {
-    assert.equal(res.text, 'malformed URL')
-  })
-  .end(done)
+    .get('/%%')
+    .expect(200, function (err, res) {
+      assert.equal(res.text, 'malformed URL')
+    })
+    .end(done)
 })
 
 describe('regressions', function () {
   it('should not 404 with child routes', function (done) {
     router
-    .get('/a', function* () {
-      this.response.status = 204;
-    })
-    .get('/a/b', function* () {
-      this.response.status = 204;
-    })
-    .get('/a/b/c', function* () {
-      this.response.status = 204;
-    })
+      .get('/a', function* () {
+        this.response.status = 204
+      })
+      .get('/a/b', function* () {
+        this.response.status = 204
+      })
+      .get('/a/b/c', function* () {
+        this.response.status = 204
+      })
 
     request(server)
-    .get('/a')
-    .expect(204, function (err, res) {
-      assert.ifError(err);
-
-      request(server)
-      .get('/a/b')
+      .get('/a')
       .expect(204, function (err, res) {
-        assert.ifError(err);
+        assert.ifError(err)
 
         request(server)
-        .get('/a/b/c')
-        .expect(204, done);
+          .get('/a/b')
+          .expect(204, function (err, res) {
+            assert.ifError(err)
+
+            request(server)
+              .get('/a/b/c')
+              .expect(204, done)
+          })
       })
-    })
   })
 })
 
-function* noop(next) {
+function* noop (next) {
   yield* next
 }
