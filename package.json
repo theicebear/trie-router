@@ -1,5 +1,5 @@
 {
-  "name": "koa-trie-router",
+  "name": "trie-koa-router",
   "description": "Trie-routing for Koa",
   "version": "1.1.0",
   "author": {
@@ -9,7 +9,10 @@
     "twitter": "https://twitter.com/jongleberry"
   },
   "license": "MIT",
-  "repository": "koajs/trie-router",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/theicebear/trie-router.git"
+  },
   "dependencies": {
     "methods": "1",
     "flatten": "0",
