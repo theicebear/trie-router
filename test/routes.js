@@ -62,6 +62,17 @@ describe('router[method]()', function () {
     router.del.should.be.a.Function
   })
 
+  it('should try to match the rest of url at the last param', function (done) {
+    router.get('/a/b/:c', function* (next) {
+      this.params.c.should.equal('c/d')
+      this.status = 204
+    })
+
+    request(server)
+      .get('/a/b/c/d')
+      .expect(204, done)
+  })
+
   describe('when defining nested routes', function () {
     router.get(['/stack/one', ['/stack/two', '/stack/three']], function* (next) {
       this.status = 204

@@ -11,7 +11,7 @@
     "methods": "1",
     "flatten": "0",
     "is-gen-fn": "0",
-    "routington": "1",
+    "routington2": "1",
     "koa-compose": "2"
   },
   "devDependencies": {
